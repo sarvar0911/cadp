@@ -1,0 +1,48 @@
+services:
+  # django:
+  #   container_name: django
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: python manage.py runserver 0.0.0.0:8000
+  #   volumes:
+  #     - .:/usr/src/app
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DEBUG=1
+  #     - SECRET_KEY=django-insecure-j)rpt%euhjvp6a9ac&j1nswu4msvh4rhsx&5tf_pwt0)^i900*
+  #     - ALLOWED_HOSTS=localhost,127.0.0.1
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+
+  celery:
+    container_name: celery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      # - django
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  # celery-beat:
+  #   container_name: celery-beat
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: celery -A config beat --loglevel=info
+  #   volumes:
+  #     - .:/usr/src/app
+  #   depends_on:
+  #     - django
+  #     - redis
+  #   environment:
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
